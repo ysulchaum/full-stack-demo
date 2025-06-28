@@ -1,0 +1,10 @@
+yourdomain.com {
+	reverse_proxy frontend:3000
+}
+
+api.yourdomain.com {
+	tls {
+		dns cloudflare {$CLOUDFLARE_API_TOKEN}
+	}
+	reverse_proxy backend:8000
+}

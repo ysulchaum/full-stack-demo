@@ -1,37 +1,52 @@
-version: '3.8'
 services:
   backend:
     build:
       context: ./backend
+    container_name: backend
+    expose:
+      - "8000"
     depends_on:
       mysql:
         condition: service_healthy
     environment:
-      MYSQL_HOST: localhost
+      MYSQL_HOST: mysql
       MYSQL_USER: user
-      MYSQL_PASSWORD: 011007
+      MYSQL_PASSWORD: password
       MYSQL_DB: counter_db
     volumes:
       - ./backend:/app
-
-  frontend:
-    build: ./frontend
-    ports:
-      - "80:80"
-      - "443:443"
     networks:
       - app-network
 
-  nginx:
-    build:
-      context: .
-      dockerfile: nginx/Dockerfile
+  frontend:
+    build: 
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: frontend
+    expose:
+      - "3000"
+    environment:
+      - NODE_ENV=production
+    networks:
+      - app-network
+
+  caddy:
+    build: 
+      context: ./caddy
+      dockerfile: Dockerfile
+    container_name: caddy
     ports:
       - "80:80"
       - "443:443"
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
     depends_on:
-      - backend
       - frontend
+      - backend
+    environment:
+      - CLOUDFLARE_API_TOKEN=your_cloudflare_api_token
     networks:
       - app-network
 
@@ -41,7 +56,7 @@ services:
       MYSQL_ROOT_PASSWORD: root_password
       MYSQL_DATABASE: counter_db
       MYSQL_USER: user
-      MYSQL_PASSWORD: 011007
+      MYSQL_PASSWORD: password
     ports:
       - "3307:3306"
     volumes:
@@ -51,9 +66,13 @@ services:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 10s
       retries: 5
+    networks:
+      - app-network
 
 volumes:
   mysql_data:
+  caddy_data:
+  caddy_config:
 
 networks:
   app-network:

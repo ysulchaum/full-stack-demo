@@ -5,7 +5,7 @@ function App() {
   const [count, setCount] = useState(0);
   const [isClicked, setIsClicked] = useState(false);
 
-  const API_BASE_URL = 'http://synthpartner';
+  const API_BASE_URL = 'your_backend_url_here'; // Replace with your backend URL
 
   // Fetch initial count on component mount
   useEffect(() => {
@@ -18,6 +18,7 @@ function App() {
   // Handle button click
   const handleClick = async () => {
     setIsClicked(true);
+    console.log('Button clicked, sending click to backend...');
     try {
       const response = await fetch(`${API_BASE_URL}/api/click`, {
         method: 'POST',
